@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import Square from "../Square/Square";
 import r2h from "../../img/r2h.png";
 import fellowship from "../../img/fellowships.png";
+import ResetButton from "../ResetButton/ResetButton";
+
 const Board = () => {
   const initialBoard = Array(9).fill(null);
   const [squares, setSquares] = useState(initialBoard);
-  const [playerXIsNext, setplayerXIsNext] = useState(true);
+  const [playerXIsNext, setPlayerXIsNext] = useState(true);
 
   const renderSquare = (i) => {
     return <Square value={squares[i]} onClick={() => handleClick(i)} />;
@@ -13,10 +15,22 @@ const Board = () => {
 
   const handleClick = (i) => {
     const newSquares = [...squares];
+    const winnerDeclared = Boolean(calculateWinner(squares));
+    const squareAlreadyFilled = Boolean(newSquares[i]);
+    if (winnerDeclared || squareAlreadyFilled) return;
+    newSquares[i] = playerXIsNext ? "X" : "0";
 
-    newSquares[i] = playerXIsNext ? "X" : "O";
     setSquares(newSquares);
-    setplayerXIsNext(!playerXIsNext);
+    setPlayerXIsNext(!playerXIsNext);
+  };
+
+  const isBoardFull = (squares) => {
+    for (let i = 0; i < squares.length; i++) {
+      if (squares[i] == null) {
+        return false;
+      }
+    }
+    return true;
   };
 
   const calculateWinner = (squares) => {
@@ -35,7 +49,7 @@ const Board = () => {
       [0, 4, 8],
       [2, 4, 6],
     ]; // shows all of the winning combinations ("lines")
-
+    // Iterate over lines
     for (let line of lines) {
       const [a, b, c] = line;
       if (
@@ -53,10 +67,17 @@ const Board = () => {
 
   const getStatus = () => {
     if (winner) {
-      return "congrats player" + winner + "For winning";
+      return "Congrats player" + winner;
+    } else if (isBoardFull(squares)) {
+      return "The game ended in a draw!";
     } else {
-      return "next player is player" + (playerXIsNext ? "x" : "O");
+      return "Next player is player" + (playerXIsNext ? "X" : "O");
     }
+  };
+
+  const resetGame = () => {
+    setSquares(initialBoard);
+    setPlayerXIsNext(true);
   };
 
   return (
@@ -85,6 +106,7 @@ const Board = () => {
               {renderSquare(8)}
             </div>
           </div>
+          <ResetButton onClick={resetGame} />
         </div>
       </main>
     </>
